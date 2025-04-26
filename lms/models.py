@@ -18,12 +18,12 @@ class Course(models.Model):
         blank=True, null=True, verbose_name="Описание курса", help_text="Опишите курс"
     )
 
-    def __str__(self):
-        return f"{self.name}"
-
     class Meta:
         verbose_name = "Курс"
         verbose_name_plural = "Курсы"
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 class Lesson(models.Model):
@@ -52,9 +52,9 @@ class Lesson(models.Model):
         Course, on_delete=models.CASCADE, verbose_name="Курс", help_text="Укажите курс"
     )
 
-    def __str__(self):
-        return f"{self.course.name} - {self.name}"
-
     class Meta:
         verbose_name = "Урок"
         verbose_name_plural = "Уроки"
+
+    def __str__(self):
+        return f"{self.course.name} - {self.name}"
