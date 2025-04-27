@@ -68,4 +68,4 @@ class Payments(models.Model):
             return self.paid_course
         elif self.paid_course_lesson == 'lesson':
             return self.paid_lesson
-
+        return None
