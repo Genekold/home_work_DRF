@@ -49,7 +49,11 @@ class Lesson(models.Model):
         null=True,
     )
     course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, verbose_name="Курс", help_text="Укажите курс"
+        Course,
+        on_delete=models.CASCADE,
+        verbose_name="Курс",
+        help_text="Укажите курс",
+        related_name='lessons'
     )
 
     class Meta:
