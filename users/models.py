@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from lms.models import Course, Lesson
 
@@ -41,31 +42,67 @@ class User(AbstractUser):
         verbose_name_plural = "пользователи"
 
 
-class Payments(models.Model):
-
-    PAID_CHOISES = [
-        ("course", "course"),
-        ("lesson", "lesson"),
+class Payment(models.Model):
+    PAYMENT_TYPE_CHOISES = [
+        ("course", "Курс"),
+        ("lesson", "Урок"),
     ]
-    METHOD_CHOISES = [
-        ("cash", "cash"),
-        ("trans", "trans")
+    PAYMENT_METHOD_CHOISES = [
+        ("cash", "Наличные"),
+        ("trans", "Перевод")
     ]
-    user = models.ForeignKey(User, verbose_name="Пользователь", on_delete=models.CASCADE)
-    payment_date = models.DateTimeField(verbose_name="Дата оплаты", auto_now_add=True)
-    paid_course_lesson = models.CharField(max_length=6, choices=PAID_CHOISES, verbose_name='Оплаченный курс/урок')
-    paid_course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, verbose_name='Оплаченый курс')
-    paid_lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, blank=True, null=True, verbose_name='Оплаченый урок')
-    payment_amount = models.PositiveIntegerField(verbose_name='Суммма оплаты')
-    payment_method = models.CharField(max_length=5, choices=METHOD_CHOISES, verbose_name="Способ оплаты")
+    user = models.ForeignKey(
+        User,
+        on_delete = models.CASCADE,
+        verbose_name="Пользователь"
+    )
+    payment_date = models.DateTimeField(
+        auto_now_add = True,
+        verbose_name="Дата оплаты"
+    )
+    payment_type = models.CharField(
+        max_length=6,
+        choices=PAYMENT_TYPE_CHOISES,
+        verbose_name='Тип оплаты')
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        verbose_name='Курс'
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        verbose_name='Урок'
+    )
+    payment_amount = models.PositiveIntegerField(
+        verbose_name='Суммма оплаты'
+    )
+    payment_method = models.CharField(
+        max_length=5,
+        choices=PAYMENT_METHOD_CHOISES,
+        verbose_name="Способ оплаты")
 
     class Meta:
-        verbose_name = "Оплата"
-        verbose_name_plural = "Оплата"
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+        ordering = ["-payment_date"]
 
-    def get_paid_course_lesson(self):
-        if self.paid_course_lesson == 'course':
-            return self.paid_course
-        elif self.paid_course_lesson == 'lesson':
-            return self.paid_lesson
-        return None
+    def __str__(self):
+        return f"Платеж {self.id} - {self.user}"
+
+    def clean(self):
+        super().clean()
+
+        if self.payment_type == "course" and not self.course:
+            raise ValidationError("Для типа 'курс' необходимо указать курс.")
+        elif self.payment_type == "lesson" and not self.lesson:
+            raise ValidationError("Для типа 'урок' необходимо указать урок.")
+
+        if self.payment_type == "course" and self.lesson:
+            raise ValidationError("Для типа 'курс' не должно быть указано урока.")
+        elif self.payment_type == "lesson" and not self.course:
+            raise ValidationError("Для типа 'урок' не должно быть указано курса")
