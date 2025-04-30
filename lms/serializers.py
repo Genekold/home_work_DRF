@@ -6,7 +6,7 @@ from lms.models import Course, Lesson
 class CourseSerializer(ModelSerializer):
     """Сериализатор курса"""
     lessons = SerializerMethodField()
-
+    lessons_in_the_course = SerializerMethodField()
     class Meta:
         model = Course
         fields = "__all__"
@@ -14,18 +14,16 @@ class CourseSerializer(ModelSerializer):
     def get_lessons(self, obj):
         return [lesson.name for lesson in obj.lessons.all()]
 
+    def get_lessons_in_the_course(self, obj):
+        return obj.lessons.count()
+
 
 class LessonDetailSerializer(ModelSerializer):
     """Сериализатор детальног представления урока"""
-    lessons_in_the_course = SerializerMethodField()
-    course = CourseSerializer()
 
     class Meta:
         model = Lesson
-        fields = ('name', 'preview', 'description', 'lessons_in_the_course', 'course',)
-
-    def get_lessons_in_the_course(self, obj):
-        return Lesson.objects.filter(course=obj.course).count()
+        fields = ('name', 'preview', 'description', 'course',)
 
 
 class LessonSerializer(ModelSerializer):
