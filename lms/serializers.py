@@ -5,8 +5,10 @@ from lms.models import Course, Lesson
 
 class CourseSerializer(ModelSerializer):
     """Сериализатор курса"""
+
     lessons = SerializerMethodField()
     lessons_in_the_course = SerializerMethodField()
+
     class Meta:
         model = Course
         fields = "__all__"
@@ -23,14 +25,19 @@ class LessonDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ('name', 'preview', 'description', 'course',)
+        fields = (
+            "name",
+            "preview",
+            "description",
+            "course",
+        )
 
 
 class LessonSerializer(ModelSerializer):
     """Сериализатор урока"""
+
     course = CourseSerializer()
 
     class Meta:
         model = Lesson
         fields = "__all__"
-

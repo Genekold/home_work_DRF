@@ -8,30 +8,83 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0001_initial'),
-        ('users', '0003_alter_payments_options'),
+        ("lms", "0001_initial"),
+        ("users", "0003_alter_payments_options"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('payment_date', models.DateTimeField(auto_now_add=True, verbose_name='Дата оплаты')),
-                ('payment_type', models.CharField(choices=[('course', 'Курс'), ('lesson', 'Урок')], max_length=6, verbose_name='Тип оплаты')),
-                ('payment_amount', models.PositiveIntegerField(verbose_name='Суммма оплаты')),
-                ('payment_method', models.CharField(choices=[('cash', 'Наличные'), ('trans', 'Перевод')], max_length=5, verbose_name='Способ оплаты')),
-                ('course', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='lms.course', verbose_name='Курс')),
-                ('lesson', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='lms.lesson', verbose_name='Урок')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "payment_date",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Дата оплаты"),
+                ),
+                (
+                    "payment_type",
+                    models.CharField(
+                        choices=[("course", "Курс"), ("lesson", "Урок")],
+                        max_length=6,
+                        verbose_name="Тип оплаты",
+                    ),
+                ),
+                (
+                    "payment_amount",
+                    models.PositiveIntegerField(verbose_name="Суммма оплаты"),
+                ),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[("cash", "Наличные"), ("trans", "Перевод")],
+                        max_length=5,
+                        verbose_name="Способ оплаты",
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="lms.course",
+                        verbose_name="Курс",
+                    ),
+                ),
+                (
+                    "lesson",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="lms.lesson",
+                        verbose_name="Урок",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Платеж',
-                'verbose_name_plural': 'Платежи',
-                'ordering': ['-payment_date'],
+                "verbose_name": "Платеж",
+                "verbose_name_plural": "Платежи",
+                "ordering": ["-payment_date"],
             },
         ),
         migrations.DeleteModel(
-            name='Payments',
+            name="Payments",
         ),
     ]
