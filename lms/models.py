@@ -24,7 +24,7 @@ class Course(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Автор",
         blank=True,
-        null=True,
+        null=True
     )
 
     class Meta:

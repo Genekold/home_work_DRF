@@ -1,3 +1,4 @@
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      ListAPIView, RetrieveAPIView,
                                      UpdateAPIView)
@@ -6,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from lms.models import Course, Lesson
 from lms.serializers import (CourseSerializer, LessonDetailSerializer,
                              LessonSerializer)
+from users.permissions import IsModer
 
 
 class CourseViewSet(ModelViewSet):
@@ -14,12 +16,28 @@ class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
+    def perform_create(self, serializer):
+        course = serializer.save()
+        course.owner = self.request.user
+        course.save()
+
+    def get_permissions(self):
+        if self.action in ["create", "destroy"]:
+            self.permission_classes = (~IsModer,)
+        elif self.action in ["update", "retrieve"]:
+            self.permission_classes = (IsModer,)
+        return super().get_permissions()
+
 
 class LessonCreateApiView(CreateAPIView):
     """Создания урока"""
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (~IsModer,)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class LessonListApiView(ListAPIView):
@@ -34,6 +52,7 @@ class LessonRetrieveApiView(RetrieveAPIView):
 
     queryset = Lesson.objects.all()
     serializer_class = LessonDetailSerializer
+    permission_classes = (IsModer,)
 
 
 class LessonUpdateApiView(UpdateAPIView):
@@ -41,6 +60,7 @@ class LessonUpdateApiView(UpdateAPIView):
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (IsModer,)
 
 
 class LessonDestroyApiView(DestroyAPIView):
@@ -48,3 +68,4 @@ class LessonDestroyApiView(DestroyAPIView):
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = (~IsModer,)

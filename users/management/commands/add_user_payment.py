@@ -8,9 +8,15 @@ class Command(BaseCommand):
     help = "Добавляет пользователя и оплату за курсы и уроки"
 
     def handle(self, *args, **options):
-
+        moder = User.objects.create(email="moder@mail.ru")
+        moder.set_password("qwe123")
+        moder.save()
         user1 = User.objects.create(email="user1@mail.ru")
+        user1.set_password("qwe123")
+        user1.save()
         user2 = User.objects.create(email="user2@mail.ru")
+        user2.set_password("qwe123")
+        user2.save()
 
         course1 = Course.objects.create(name="Математика")
         course2 = Course.objects.create(name="Русский язык")
