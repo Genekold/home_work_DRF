@@ -25,6 +25,7 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             "preview",
             "description",
             "course",
+            "owner"
         )
 
 
