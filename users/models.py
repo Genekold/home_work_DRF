@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from lms.models import Course, Lesson
 
@@ -47,44 +47,24 @@ class Payment(models.Model):
         ("course", "Курс"),
         ("lesson", "Урок"),
     ]
-    PAYMENT_METHOD_CHOISES = [
-        ("cash", "Наличные"),
-        ("trans", "Перевод")
-    ]
+    PAYMENT_METHOD_CHOISES = [("cash", "Наличные"), ("trans", "Перевод")]
     user = models.ForeignKey(
-        User,
-        on_delete = models.CASCADE,
-        verbose_name="Пользователь"
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    payment_date = models.DateTimeField(
-        auto_now_add = True,
-        verbose_name="Дата оплаты"
-    )
+    payment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата оплаты")
     payment_type = models.CharField(
-        max_length=6,
-        choices=PAYMENT_TYPE_CHOISES,
-        verbose_name='Тип оплаты')
+        max_length=6, choices=PAYMENT_TYPE_CHOISES, verbose_name="Тип оплаты"
+    )
     course = models.ForeignKey(
-        Course,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        verbose_name='Курс'
+        Course, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Курс"
     )
     lesson = models.ForeignKey(
-        Lesson,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        verbose_name='Урок'
+        Lesson, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Урок"
     )
-    payment_amount = models.PositiveIntegerField(
-        verbose_name='Суммма оплаты'
-    )
+    payment_amount = models.PositiveIntegerField(verbose_name="Суммма оплаты")
     payment_method = models.CharField(
-        max_length=5,
-        choices=PAYMENT_METHOD_CHOISES,
-        verbose_name="Способ оплаты")
+        max_length=5, choices=PAYMENT_METHOD_CHOISES, verbose_name="Способ оплаты"
+    )
 
     class Meta:
         verbose_name = "Платеж"

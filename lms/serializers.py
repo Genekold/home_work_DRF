@@ -1,36 +1,46 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
-
+from rest_framework import serializers
 from lms.models import Course, Lesson
 
 
-class CourseSerializer(ModelSerializer):
+class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор курса"""
-    lessons = SerializerMethodField()
-    lessons_in_the_course = SerializerMethodField()
+
+    lessons_in_the_course = serializers.SerializerMethodField()
+
     class Meta:
         model = Course
         fields = "__all__"
-
-    def get_lessons(self, obj):
-        return [lesson.name for lesson in obj.lessons.all()]
 
     def get_lessons_in_the_course(self, obj):
         return obj.lessons.count()
 
 
-class LessonDetailSerializer(ModelSerializer):
+class LessonDetailSerializer(serializers.ModelSerializer):
     """Сериализатор детальног представления урока"""
 
     class Meta:
         model = Lesson
-        fields = ('name', 'preview', 'description', 'course',)
+        fields = (
+            "name",
+            "preview",
+            "description",
+            "course",
+            "owner"
+        )
 
 
-class LessonSerializer(ModelSerializer):
+class LessonSerializer(serializers.ModelSerializer):
     """Сериализатор урока"""
-    course = CourseSerializer()
+
+    course = CourseSerializer(read_only=True)
+
+    course_id = serializers.PrimaryKeyRelatedField(
+        queryset=Course.objects.all(),
+        source='course',
+        write_only=True,
+        required=True
+    )
 
     class Meta:
         model = Lesson
         fields = "__all__"
-
