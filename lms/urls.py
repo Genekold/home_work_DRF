@@ -4,7 +4,7 @@ from rest_framework.routers import SimpleRouter
 from lms.apps import LmsConfig
 from lms.views import (CourseViewSet, LessonCreateApiView,
                        LessonDestroyApiView, LessonListApiView,
-                       LessonRetrieveApiView, LessonUpdateApiView)
+                       LessonRetrieveApiView, LessonUpdateApiView, SubscriptionAPIView)
 
 app_name = LmsConfig.name
 
@@ -21,4 +21,5 @@ urlpatterns = [
     path(
         "lesson/<int:pk>/update/", LessonUpdateApiView.as_view(), name="lesson-update"
     ),
+    path("subscription/", SubscriptionAPIView.as_view(), name="subscription")
 ] + router.urls

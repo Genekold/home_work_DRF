@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from lms.models import Course, Lesson
+from lms.models import Course, Lesson, Subscription
 from lms.validators import validate_url
 
 
@@ -7,6 +7,7 @@ class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор курса"""
 
     lessons_in_the_course = serializers.SerializerMethodField()
+    subscription = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -14,6 +15,10 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_lessons_in_the_course(self, obj):
         return obj.lessons.count()
+
+    def get_subscription(self, obj):
+        user = self.context["request"].user
+        return Subscription.objects.all().filter(user=user).filter(course=obj).exists()
 
 
 class LessonDetailSerializer(serializers.ModelSerializer):
@@ -45,4 +50,12 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
+        fields = "__all__"
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор подписки"""
+
+    class Meta:
+        model = Subscription
         fields = "__all__"
