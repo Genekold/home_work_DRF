@@ -52,7 +52,6 @@ class LessonListApiView(ListAPIView):
     serializer_class = LessonSerializer
 
 
-
 class LessonRetrieveApiView(RetrieveAPIView):
     """Детальное представление урока"""
 
@@ -78,6 +77,8 @@ class LessonDestroyApiView(DestroyAPIView):
 
 
 class SubscriptionAPIView(APIView):
+    """Подписка на курс"""
+
     serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated,)
 
