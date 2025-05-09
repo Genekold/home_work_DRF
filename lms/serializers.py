@@ -46,7 +46,7 @@ class LessonSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True
     )
-    url = serializers.URLField(validators=[validate_url])
+    url = serializers.URLField(validators=[validate_url], required=False)
 
     class Meta:
         model = Lesson
