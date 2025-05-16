@@ -13,8 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     """Сериализатор платежа"""
 
-    course = CourseSerializer()
-    lesson = LessonSerializer()
+    course = CourseSerializer(read_only=True)
+    lesson = LessonSerializer(read_only=True)
 
     class Meta:
         model = Payment
