@@ -1,4 +1,4 @@
-
+from rest_framework import status
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      ListAPIView, RetrieveAPIView,
                                      UpdateAPIView, get_object_or_404)
@@ -11,6 +11,8 @@ from lms.models import Course, Lesson, Subscription
 from lms.paginations import CustomPagination
 from lms.serializers import (CourseSerializer, LessonDetailSerializer,
                              LessonSerializer, SubscriptionSerializer)
+from lms.tasks import send_message_when_update_course
+from users.models import User
 from users.permissions import IsModer, IsOwner
 
 
@@ -34,6 +36,18 @@ class CourseViewSet(ModelViewSet):
         elif self.action == "destroy":
             self.permission_classes = (~IsModer | IsOwner,)
         return super().get_permissions()
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+
+        if response.status_code == status.HTTP_200_OK:
+            course_id = kwargs["pk"]
+            users = User.objects.filter(subscription__course_id=course_id)
+            email_list = []
+            for user in users:
+                email_list.append(user.email)
+            send_message_when_update_course.delay(course_id, email_list)
+        return response
 
 
 class LessonCreateApiView(CreateAPIView):
