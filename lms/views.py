@@ -37,17 +37,21 @@ class CourseViewSet(ModelViewSet):
             self.permission_classes = (~IsModer | IsOwner,)
         return super().get_permissions()
 
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        course = serializer.save()
+        send_message_when_update_course.delay(course.id, course.name)
 
-        if response.status_code == status.HTTP_200_OK:
-            course_id = kwargs["pk"]
-            users = User.objects.filter(subscription__course_id=course_id)
-            email_list = []
-            for user in users:
-                email_list.append(user.email)
-            send_message_when_update_course.delay(course_id, email_list)
-        return response
+    # def update(self, request, *args, **kwargs):
+    #     response = super().update(request, *args, **kwargs)
+    #
+    #     if response.status_code == status.HTTP_200_OK:
+    #         course_id = kwargs["pk"]
+    #         users = User.objects.filter(subscription__course_id=course_id)
+    #         email_list = []
+    #         for user in users:
+    #             email_list.append(user.email)
+    #         send_message_when_update_course.delay(course_id, email_list)
+    #     return response
 
 
 class LessonCreateApiView(CreateAPIView):

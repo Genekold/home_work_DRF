@@ -146,7 +146,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
     "block_user_not_active": {
-        "task": "lms.tasks.block_user_not_active",
+        "task": "users.tasks.block_user_not_active",
         "schedule": timedelta(days=1),
     },
 }
