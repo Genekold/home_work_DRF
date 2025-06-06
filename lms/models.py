@@ -91,7 +91,8 @@ class Subscription(models.Model):
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        verbose_name="Курс в подписке"
+        verbose_name="Курс в подписке",
+        related_name="subscriptions"
     )
 
     def __str__(self):
