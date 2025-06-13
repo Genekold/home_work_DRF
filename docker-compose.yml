@@ -1,10 +1,72 @@
-version: '3.9'
-
 services:
   db:
-    image: postgres:16.0
+    image: postgres:16-alpine
     container_name: postgres_lms
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER" ]
+      interval: 30s
+      retries: 5
+      timeout: 10s
+    networks:
+      - lms-network
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - lms-network
+    volumes:
+      - redis_data:/data
+
+  app-lms:
+    build: .
+    ports:
+      - "8000:8000"
+    command:
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app-lms
+      - static_volume:/code/static
     environment:
-      - POSTGRES_DB=${NAME}
-      - POSTGRES_USER=${USER}
-      - POSTGRES_PASSWORD=${PASSWORD}
+      - DATABASE_HOST=db
+    networks:
+      - lms-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  celery:
+    build: .
+    command: celery -A config worker --loglevel=info
+    env_file:
+      - .env
+    networks:
+      - lms-network
+    depends_on:
+      - redis
+      - db
+
+  celery-beat:
+    build: .
+    command: celery -A config beat --loglevel=info
+    env_file:
+      - .env
+    networks:
+      - lms-network
+    depends_on:
+      - redis
+      - db
+
+networks:
+  lms-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis_data:
+  static_volume:
