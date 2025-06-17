@@ -43,7 +43,7 @@ services:
       sh -c "python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
-      - static_volume:/app/static
+      - static_volume:/app/staticfiles
     environment:
       DB_HOST: db
       DB_PORT: ${DB_PORT}
@@ -59,7 +59,8 @@ services:
 
   celery:
     build: .
-    command: celery -A config worker --loglevel=info
+    user: "${UID:-1000}:${GID:-1000}"
+    command: celery -A config worker --loglevel=info --uid=1000 --gid=1000
     env_file:
       - .env
     networks:
@@ -70,6 +71,7 @@ services:
 
   celery-beat:
     build: .
+    user: "${UID:-1000}:${GID:-1000}"
     command: celery -A config beat --loglevel=info
     env_file:
       - .env
@@ -82,6 +84,7 @@ services:
   nginx:
     build:
       context: ./nginx
+    user: "${UID:-1000}:${GID:-1000}"
     ports:
       - "80:80"
     volumes:
