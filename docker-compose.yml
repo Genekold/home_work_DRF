@@ -1,9 +1,8 @@
-version: '3.9'
-
 services:
   db:
     image: postgres:16-alpine
     container_name: postgres_lms
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -37,10 +36,9 @@ services:
 
   app:
     build: .
-    user: "${UID:-1000}:${GID:-1000}"
     env_file: .env
     command:
-      sh -c "python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+      sh -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -59,8 +57,7 @@ services:
 
   celery:
     build: .
-    user: "${UID:-1000}:${GID:-1000}"
-    command: celery -A config worker --loglevel=info --uid=1000 --gid=1000
+    command: celery -A config worker --loglevel=info
     env_file:
       - .env
     networks:
@@ -71,7 +68,6 @@ services:
 
   celery-beat:
     build: .
-    user: "${UID:-1000}:${GID:-1000}"
     command: celery -A config beat --loglevel=info
     env_file:
       - .env
@@ -84,7 +80,6 @@ services:
   nginx:
     build:
       context: ./nginx
-    user: "${UID:-1000}:${GID:-1000}"
     ports:
       - "80:80"
     volumes:
