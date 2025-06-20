@@ -49,52 +49,27 @@ class Payment(models.Model):
     ]
     PAYMENT_METHOD_CHOISES = [("cash", "Наличные"), ("trans", "Перевод")]
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь"
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    payment_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата оплаты"
-    )
+    payment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата оплаты")
     payment_type = models.CharField(
-        max_length=6,
-        choices=PAYMENT_TYPE_CHOISES,
-        verbose_name="Тип оплаты"
+        max_length=6, choices=PAYMENT_TYPE_CHOISES, verbose_name="Тип оплаты"
     )
     course = models.ForeignKey(
-        Course,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        verbose_name="Курс"
+        Course, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Курс"
     )
     lesson = models.ForeignKey(
-        Lesson,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        verbose_name="Урок"
+        Lesson, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Урок"
     )
-    payment_amount = models.PositiveIntegerField(
-        verbose_name="Суммма оплаты"
-    )
+    payment_amount = models.PositiveIntegerField(verbose_name="Суммма оплаты")
     payment_method = models.CharField(
-        max_length=5,
-        choices=PAYMENT_METHOD_CHOISES,
-        verbose_name="Способ оплаты"
+        max_length=5, choices=PAYMENT_METHOD_CHOISES, verbose_name="Способ оплаты"
     )
     session_id = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        verbose_name="Iid сессии"
+        max_length=255, blank=True, null=True, verbose_name="Iid сессии"
     )
     link = models.URLField(
-        max_length=400,
-        blank=True,
-        null=True,
-        verbose_name="Ссылка на оплату"
+        max_length=400, blank=True, null=True, verbose_name="Ссылка на оплату"
     )
 
     class Meta:

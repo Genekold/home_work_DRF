@@ -26,13 +26,7 @@ class LessonDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = (
-            "name",
-            "preview",
-            "description",
-            "course",
-            "owner"
-        )
+        fields = ("name", "preview", "description", "course", "owner")
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -41,10 +35,7 @@ class LessonSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
 
     course_id = serializers.PrimaryKeyRelatedField(
-        queryset=Course.objects.all(),
-        source='course',
-        write_only=True,
-        required=True
+        queryset=Course.objects.all(), source="course", write_only=True, required=True
     )
     url = serializers.URLField(validators=[validate_url], required=False)
 

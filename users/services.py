@@ -1,4 +1,3 @@
-
 import stripe
 from config.settings import STRIPE_API_KEY
 

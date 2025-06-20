@@ -5,7 +5,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import Payment, User
-from users.serializers import PaymentSerializer, UserSerializer, MyTokenObtainPairSerializer
+from users.serializers import (
+    PaymentSerializer,
+    UserSerializer,
+    MyTokenObtainPairSerializer,
+)
 from users.services import create_stripe_price, create_stripe_session
 
 
