@@ -166,3 +166,7 @@ if "test" in sys.argv:
             "NAME": BASE_DIR / 'test_db.sqlite3',
         }
     }
+
+if 'test' in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
