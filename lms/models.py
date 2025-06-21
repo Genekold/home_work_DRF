@@ -24,7 +24,7 @@ class Course(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Автор",
         blank=True,
-        null=True
+        null=True,
     )
 
     class Meta:
@@ -84,15 +84,13 @@ class Subscription(models.Model):
     """Модель подписки на курс"""
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
         verbose_name="Курс в подписке",
-        related_name="subscriptions"
+        related_name="subscriptions",
     )
 
     def __str__(self):

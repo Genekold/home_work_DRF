@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -34,8 +35,8 @@ INSTALLED_APPS = [
     "users",
     "lms",
     "django_filters",
-    'drf_yasg',
-    'django_celery_beat',
+    "drf_yasg",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -69,12 +70,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend"
-    ],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -141,7 +140,7 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND"),
+CELERY_RESULT_BACKEND = (os.getenv("CELERY_RESULT_BACKEND"),)
 
 
 CELERY_BEAT_SCHEDULE = {
@@ -160,3 +159,17 @@ EMAIL_USE_SSL = True
 
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / 'test_db.sqlite3',
+        }
+    }
+
+if 'test' in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
