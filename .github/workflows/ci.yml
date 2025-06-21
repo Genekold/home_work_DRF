@@ -60,74 +60,21 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
 
-#  deploy:
-#    needs: build
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#
-#      - uses: webfactory/ssh-agent@v0.9.0
-#        with:
-#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#
-#      - name: Deploy to Server
-#        run: |
-#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-#          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
-#          docker stop myapp || true
-#          docker rm myapp || true
-#          docker run -d --name myapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
-#          EOF
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+
+      - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Login to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-
       - name: Deploy to Server
         run: |
-          ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'DEPLOY'
-          # Authenticate with Docker Hub
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin || exit 1
-
-          # Pull new image
-          docker pull "${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}" || exit 1
-
-          # Stop and remove old container
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
           docker stop myapp || true
           docker rm myapp || true
-
-          # Run new container with production settings
-          docker run -d \
-            --name myapp \
-            --restart unless-stopped \
-            --health-cmd "curl -f http://localhost:8000/health || exit 1" \
-            --health-interval 30s \
-            -p 80:8000 \
-            -e SECRET_KEY='${{ secrets.DJANGO_SECRET_KEY }}' \
-            -e DEBUG='False' \
-            "${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}" || exit 1
-
-          # Cleanup old images
-          docker image prune -af --filter "until=24h" || true
-          DEPLOY
-
-      - name: Verify deployment
-        run: |
-          status=$(ssh -T ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
-            "docker inspect -f '{{.State.Health.Status}}' myapp 2>/dev/null || echo 'not-running'")
-
-          if [ "$status" != "healthy" ]; then
-            echo "::error::Deployment failed - Container status: $status"
-            exit 1
-          fi
+          docker run -d --name myapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+          EOF
