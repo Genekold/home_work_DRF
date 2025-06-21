@@ -82,7 +82,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: production  # Добавляем environment для контроля доступа
+    environment: production
 
     steps:
       - name: Setup SSH
@@ -91,28 +91,23 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Login to Docker Hub
-        env:
-          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-        run: |
-          echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-
-      - name: Configure Docker Hub
         run: |
           echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Deploy to Server
         run: |
           ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'DEPLOY'
-          # Pull new image
+          # Authenticate with Docker Hub
           echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin || exit 1
+
+          # Pull new image
           docker pull "${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}" || exit 1
 
-          # Stop and clean up old container
+          # Stop and remove old container
           docker stop myapp || true
           docker rm myapp || true
 
-          # Run new container with health check and restart policy
+          # Run new container with production settings
           docker run -d \
             --name myapp \
             --restart unless-stopped \
@@ -120,15 +115,19 @@ jobs:
             --health-interval 30s \
             -p 80:8000 \
             -e SECRET_KEY='${{ secrets.DJANGO_SECRET_KEY }}' \
+            -e DEBUG='False' \
             "${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}" || exit 1
 
-          # Cleanup
-          docker system prune -af --filter "until=24h" || true
+          # Cleanup old images
+          docker image prune -af --filter "until=24h" || true
           DEPLOY
 
       - name: Verify deployment
         run: |
-          ssh -T ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
-            docker inspect --format '{{.State.Status}}' myapp | grep -q running ||
-            (echo 'Container not running' && exit 1)
-          "
+          status=$(ssh -T ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
+            "docker inspect -f '{{.State.Health.Status}}' myapp 2>/dev/null || echo 'not-running'")
+
+          if [ "$status" != "healthy" ]; then
+            echo "::error::Deployment failed - Container status: $status"
+            exit 1
+          fi
